@@ -1,86 +1,86 @@
-#ifndef MOD_T_H
-#define MOD_T_H
+#ifndef MOD_T_HPP
+#define MOD_T_HPP
 
+
+template <int Modulo>
 class mod_t {
 public:
-    mod_t(int remainder, int modulo);
+    mod_t(int remainder) {
+        static_assert(Modulo > 0, "Modulo must be positive");
+        normalize(remainder);
+    }
 
-    int get_remainder() const;
+    int get_remainder() const {
+        return remainder_;
+    }
 
-    int get_modulo() const;
+    static constexpr int get_modulo() {
+        return Modulo;
+    }
 
-    mod_t operator+(const mod_t& other) const;
+    mod_t operator+(const mod_t& other) const {
+        return mod_t(remainder_ + other.remainder_);
+    }
 
-    mod_t operator-(const mod_t& other) const;
+    mod_t operator-(const mod_t& other) const {
+        return mod_t(remainder_ - other.remainder_);
+    }
 
-    mod_t operator-() const;
+    mod_t operator-() const {
+        return mod_t(-remainder_);
+    }
 
-    mod_t operator*(const mod_t& other) const;
+    mod_t operator*(const mod_t& other) const {
+        return mod_t(remainder_ * other.remainder_);
+    }
 
+    mod_t operator+(int a) const {
+        return mod_t(remainder_ + a);
+    }
 
-    mod_t operator+(int a) const;
+    mod_t operator-(int a) const {
+        return mod_t(remainder_ - a);
+    }
 
-    mod_t operator-(int a) const;
+    mod_t operator*(int a) const {
+        return mod_t(remainder_ * a);
+    }
 
-    mod_t operator*(int a) const;
+    mod_t& operator+=(const mod_t& other) {
+        normalize(remainder_ + other.remainder_);
+        return *this;
+    }
 
+    mod_t& operator-=(const mod_t& other) {
+        normalize(remainder_ - other.remainder_);
+        return *this;
+    }
 
-    mod_t operator+=(const mod_t& other);
-    
-    mod_t operator-=(const mod_t& other);
-    
-    mod_t operator*=(const mod_t& other);
+    mod_t& operator*=(const mod_t& other) {
+        normalize(remainder_ * other.remainder_);
+        return *this;
+    }
 
+    bool operator==(const mod_t& other) const {
+        return remainder_ == other.remainder_;
+    }
 
-    // need reciprocal for division
+    bool operator!=(const mod_t& other) const {
+        return !(*this == other);
+    }
 
-    bool recip(mod_t& rinv) const;
-
-    mod_t operator/(const mod_t& other) const;
-
-    mod_t operator/=(const mod_t& other);
-
-
-    // % operation just for compatibility
-
-    mod_t operator%(const mod_t& other) const;
-
-    mod_t operator%=(const mod_t& other);
-
-
-    // exponentation a^e (e>=0); returns inverse^|e| if invertible
-
-    mod_t exp(int e) const;
-
-
-    // comparisons
-
-    bool operator==(const mod_t& other) const;
-
-    bool operator!=(const mod_t& other) const;
-
-    bool operator==(int other) const;
-
-    bool operator!=(int other) const;
-
-    bool operator<(const mod_t& other) const;
-
-    bool operator>(const mod_t& other) const;
-
-    bool operator<=(const mod_t& other) const;
-
-    bool operator>=(const mod_t& other) const;
-
-
-    
 private:
     int remainder_;
-    int modulo_;
 
-    void normalize(int x);
-    void check_if_modulo_set() const;
-    void check_same_modulo(const mod_t& other) const;
+    void normalize(int x) {
+        int r = x % Modulo;
+
+        if (r < 0) {
+            r += Modulo;
+        }
+
+        remainder_ = r;
+    }
 };
 
-
-#endif //MOD_T_H
+#endif // MOD_T_HPP
