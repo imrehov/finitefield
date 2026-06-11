@@ -83,7 +83,7 @@ public:
         int m = Modulo;
 
         int t0 = 0, t1 = 1;
-        int r0 = 0, r1 = a;
+        int r0 = m, r1 = a;
 
         while (r1 != 0) {
             int q = r0 / r1;
