@@ -168,6 +168,7 @@ public:
         return result;
     }
 
+    // #TODO fix comments for reciprocal and exponent plssssssssssss im too tired brev
 
 private:
     int remainder_;
