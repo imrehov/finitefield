@@ -1,13 +1,20 @@
 #ifndef MOD_T_HPP
 #define MOD_T_HPP
 
+#include <istream>
+#include <ostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 
 // use template instead of storing modulo as a variable -> compile time error from runtime error, better handling
 
 template <int Modulo>
 class mod_t {
 public:
+    // need this so i can declare
+    mod_t() : remainder_(0) {}
+
     mod_t(int remainder) {
         static_assert(Modulo > 0, "Modulo must be positive");
         normalize(remainder);
@@ -72,6 +79,81 @@ public:
         return !(*this == other);
     }
 
+    bool operator==(int other) const {
+
+        int r = other % Modulo;
+
+        if (r < 0){
+            r += Modulo;
+        }
+        return remainder_ == r;
+    }
+
+    bool operator!=(int other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const mod_t &other) const {
+        return remainder_ < other.remainder_;
+    }
+
+    bool operator>(const mod_t &other) const {
+        return remainder_ > other.remainder_;
+    }
+
+    bool operator<=(const mod_t &other) const {
+        return remainder_ <= other.remainder_;
+    }
+
+    bool operator>=(const mod_t &other) const {
+        return remainder_ >= other.remainder_;
+    }
+
+    //parse from string, care it can parse like "123abc"
+    bool from_string(const std::string &s, int m) {
+        int r;
+
+        //iss behaves like std::cin
+        std::istringstream iss(s);
+        iss >> r;
+        if (iss.fail()) {
+            return false;
+        }
+
+        *this = mod_t(r);
+
+        return true;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const mod_t &a) {
+        
+        os << a.remainder_;
+        return os;
+    }
+
+    friend std::istream &operator>>(std::istream &is, mod_t &a) {
+        int b = is.peek();
+        if(!is) {
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+
+        is >> std::ws;
+
+        if (!is) {
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+        is >> a.remainder_;
+        a.remainder_ %= a.get_modulo();
+
+        if(a.remainder_ < 0){
+            a.remainder_ += a.get_modulo();
+        }
+
+        return is;
+    }
+
     //euclid algo thing
     bool reciprocal(mod_t &rinv) const {
 
@@ -99,7 +181,6 @@ public:
             return false;
         }
 
-        inv_normalize(t0);
         rinv = mod_t<Modulo>(t0);
 
         return true;
@@ -137,6 +218,7 @@ public:
         return *this;
     }
 
+    //uses binary exponentiation
     mod_t exp(int e) const {
 
         if (e == 0) {
@@ -144,6 +226,7 @@ public:
             return mod_t(1);
         }
 
+        //if the exponent is negative, we need to to invert the base and multiply exponent by -1 care edgecase -int_min overflow
         if (e < 0) {
             
             mod_t<Modulo> inv;
@@ -157,6 +240,13 @@ public:
         mod_t<Modulo> base(*this);
         mod_t<Modulo> result(1);
 
+        /*
+        binary exponentiation is faster than doing a * a * a * ...
+        instead we check the exponent in binary representation
+        e & 1 checks if the last binary digit is 1, so the number is odd
+        basically every round we take the base to powers of 2 and the condition tells us whoch ones we need, only those get added to the result
+        and we reduce the exponent by shifting the binary to the right
+        */
         while (e != 0) {
             if (e & 1) {
                 result = result * base;
@@ -168,7 +258,7 @@ public:
         return result;
     }
 
-    // #TODO fix comments for reciprocal and exponent plssssssssssss im too tired brev
+    
 
 private:
     int remainder_;
@@ -183,12 +273,6 @@ private:
         remainder_ = r;
     }
 
-    static void inv_normalize(int &x) {
-        x %= Modulo;
-        if (x < 0){
-            x += Modulo;
-        }
-    }
 };
 
 #endif // MOD_T_HPP
