@@ -2,7 +2,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "../src/doctest.hpp"
 
-#include "../include/linear_convolution.hpp"
+#include "../include/lin_conv.hpp"
 
 TEST_CASE("linear convolution works for the example") {
     std::array<int, 4> a{1, 2, 3, 4};
