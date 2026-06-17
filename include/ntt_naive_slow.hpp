@@ -6,7 +6,7 @@
 #include <cstddef>
 
 template<int RootOfUnity, int M, std::size_t N>
-std::array<mod_t<M>, N> ntt_naive_slow(const std::array<mod_t<M>, N>& a) {
+std::array<mod_t<M>, N> ntt_naive_slow(const std::array<mod_t<M>, N> &a) {
     std::array<mod_t<M>, N> result{};
 
     mod_t<M> omega{RootOfUnity};

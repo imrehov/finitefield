@@ -7,7 +7,7 @@
 
 //the only thing that changes is that we need to multiply the sum with n^-1 and take omega^-k * j
 template<int RootOfUnity, int M, std::size_t N>
-std::array<mod_t<M>, N> intt_naive_slow(const std::array<mod_t<M>, N>& a) {
+std::array<mod_t<M>, N> intt_naive_slow(const std::array<mod_t<M>, N> &a) {
     std::array<mod_t<M>, N> result{};
 
     mod_t<M> omega{RootOfUnity};
