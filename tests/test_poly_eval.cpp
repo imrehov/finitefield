@@ -21,3 +21,36 @@ TEST_CASE("evaluating basic polynomial"){
 
     CHECK(result == expected);
 }
+
+TEST_CASE("evaluating 0"){
+    // this is x^3 + 2x^2 + 3x + 4
+    std::array<mod_t<10>, 4> a{
+        mod_t<10>{0},
+        mod_t<10>{0},
+        mod_t<10>{0},
+        mod_t<10>{0}
+    };
+
+    //substitute x = 2 into the above
+    auto result = poly_eval(a, 2);
+
+    int expected = 0;
+
+    CHECK(result == expected);
+}
+TEST_CASE("evaluating basic polynomial at negative x"){
+    // this is x^3 + 2x^2 + 3x + 4
+    std::array<mod_t<10>, 4> a{
+        mod_t<10>{1},
+        mod_t<10>{2},
+        mod_t<10>{3},
+        mod_t<10>{4}
+    };
+
+    //substitute x = 2 into the above
+    auto result = poly_eval(a, -2);
+
+    int expected = (-8 + 8 + -6 + 4) % 10;
+
+    CHECK(result == expected);
+}
