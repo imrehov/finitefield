@@ -28,7 +28,7 @@ std::vector<T> cyc_conv(const std::vector<T> &a, const std::vector<T> &b) {
         throw std::invalid_argument("cyclic convolution needs equal sizes");
     }
 
-    std::size_t N = a.size();
+    const std::size_t N = a.size();
 
     //initialize a result vector with N elements already so we dont have to add them in the loop
     std::vector<T> result(N, T{});
