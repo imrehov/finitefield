@@ -1,5 +1,4 @@
 #include <array>
-#include <exception>
 #include <stdexcept>
 #include <vector>
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
