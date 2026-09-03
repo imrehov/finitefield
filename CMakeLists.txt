@@ -56,5 +56,6 @@ if(BUILD_TESTING)
     add_finitefield_test(test_poly_eval)
     add_finitefield_test(test_ntt_naive_slow_multiply)
     add_finitefield_test(test_fast_recursive_ntt)
+    add_finitefield_test(test_fast_iterative_ntt)
 
 endif()
