@@ -13,6 +13,8 @@ std::vector<mod_t<M>> fast_recursive_ntt(
         return a;
     }
 
+    //split even and odd indexes in every recursive call,  thats why it can be nlogn, there are always n/2 butterflies on every level
+    // and there are log2n levels -> O(nlogn)
     std::vector<mod_t<M>> even;
     std::vector<mod_t<M>> odd;
 
