@@ -5,12 +5,21 @@
 #include <vector>
 #include <cstddef>
 
+//to do inverse do invert=true
 template<int M>
-std::vector<mod_t<M>> fast_recursive_ntt(
-    const std::vector<mod_t<M>>& a,
-    mod_t<M> omega){
+std::vector<mod_t<M>> fast_recursive_ntt(const std::vector<mod_t<M>>& a, mod_t<M> omega, bool invert=false){
     if (a.size() <= 1) {
         return a;
+    }
+
+    if (invert) {
+        mod_t<M> omega_inv{0};
+
+        if (!omega.reciprocal(omega_inv)) {
+            throw std::domain_error("Root of unity is not invertible");
+        }
+
+        omega = omega_inv;
     }
 
     //split even and odd indexes in every recursive call,  thats why it can be nlogn, there are always n/2 butterflies on every level
@@ -44,6 +53,20 @@ std::vector<mod_t<M>> fast_recursive_ntt(
         result[k + a.size() / 2] = even[k] - t;
 
         w *= omega;
+    }
+
+    if (invert) {
+        mod_t<M> n{static_cast<int>(a.size())};
+
+        mod_t<M> n_inv{0};
+
+        if (!n.reciprocal(n_inv)) {
+            throw std::domain_error("NTT size is not invertible");
+        }
+
+        for (auto& x : result) {
+            x *= n_inv;
+        }
     }
     
     return result;

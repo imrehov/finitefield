@@ -139,3 +139,61 @@ TEST_CASE("recursive NTT works for size 1") {
 
     CHECK(result == expected);
 }
+
+TEST_CASE("recursive NTT forward and inverse restores size 4 input") {
+    std::vector<mod_t<17>> a{
+        mod_t<17>{1},
+        mod_t<17>{2},
+        mod_t<17>{3},
+        mod_t<17>{4}
+    };
+
+    auto original = a;
+
+    auto transformed =
+        fast_recursive_ntt<17>(
+            a,
+            mod_t<17>{4}
+        );
+
+    auto restored =
+        fast_recursive_ntt<17>(
+            transformed,
+            mod_t<17>{4},
+            true
+        );
+
+    CHECK(restored == original);
+}
+
+
+TEST_CASE("recursive NTT forward and inverse restores size 8 input") {
+    std::vector<mod_t<17>> a{
+        mod_t<17>{1},
+        mod_t<17>{5},
+        mod_t<17>{3},
+        mod_t<17>{9},
+        mod_t<17>{2},
+        mod_t<17>{7},
+        mod_t<17>{4},
+        mod_t<17>{6}
+    };
+
+    auto original = a;
+
+    // 2 is a primitive 8th root modulo 17
+    auto transformed =
+        fast_recursive_ntt<17>(
+            a,
+            mod_t<17>{2}
+        );
+
+    auto restored =
+        fast_recursive_ntt<17>(
+            transformed,
+            mod_t<17>{2},
+            true
+        );
+
+    CHECK(restored == original);
+}
