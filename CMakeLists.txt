@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(finitefield LANGUAGES CXX)
 
@@ -57,5 +58,6 @@ if(BUILD_TESTING)
     add_finitefield_test(test_ntt_naive_slow_multiply)
     add_finitefield_test(test_fast_recursive_ntt)
     add_finitefield_test(test_fast_iterative_ntt)
+    add_finitefield_test(test_threaded_iterative_ntt)
 
 endif()

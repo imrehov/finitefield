@@ -10,7 +10,7 @@
 
 //inverse can be toggled on but forward ntt by default
 template<int RootOfUnity, int M>
-void fast_iterative_ntt(std::vector<mod_t<M>>& a, bool invert=false){
+void threaded_iterative_ntt(std::vector<mod_t<M>>& a, bool invert=false){
     if (a.size() <= 1) {
         return;
     }
@@ -69,43 +69,54 @@ void fast_iterative_ntt(std::vector<mod_t<M>>& a, bool invert=false){
         omega = omega_inv;
     }
 
-    //we have log2a.size() stages
+    //we have log2a.size() stages, len = how big is 1 independent ntt block on each stage
+    //stage loop
     for (std::size_t len {2}; len <= a.size(); len <<= 1) {
         
+        // if n=32 then we have 32/2 16 blocks, with 2 items per block -> 16 threads with 2 items per thread
         auto number_of_blocks {a.size() / len};
 
+        //calc to see how many threads, my cpu has 24, not using hardwareconcurrency because it can return 0
         auto number_of_threads {std::min(number_of_blocks, std::size_t {24})};
 
         //calulates the correct  root -> if  N = 8, and len = 2 wlen = omega^(8/2) = omega^4 primitive 2nd root ... ->len = 8 omega^(8/8) = omega primitive 8th root
         mod_t<M> wlen {omega.exp(static_cast<int>(a.size() / len))};
 
+        //reserve room for threads, doesnt launch
         std::vector<std::jthread> threads;
         threads.reserve(number_of_threads);
 
+        //worker loop
         for (std::size_t l {0}; l < number_of_threads; ++l){
 
             threads.emplace_back(
                 [&, l](){
-                                
+
+                        //calc what belongs to the worker                                
                         std::size_t block_begin{l * number_of_blocks / number_of_threads};
+
+                        //exclusive end
                         std::size_t block_end{(l + 1) * number_of_blocks / number_of_threads};
 
+                        //convert block number to array index
                         for (std::size_t i {block_begin * len}; i < (block_end * len); i += len) {
-                
-                        mod_t<M> w{1};
                         
-                        for (std::size_t j {0}; j < len / 2; j++) {
-                            auto u = a[i + j];
-                            auto v = a[i + j + len / 2] * w;
+                            //separate twiddle facto for every block
+                            mod_t<M> w{1};
                             
-                            //butterfly
-                            a[i + j] = u + v;
-                            a[i + j + len/2] = u - v;
-                            
-                            w *= wlen;
+                            //butterfly loop stays the same as single thread
+                            for (std::size_t j {0}; j < len / 2; j++) {
+                                auto u = a[i + j];
+                                auto v = a[i + j + len / 2] * w;
+                                
+                                //butterfly
+                                a[i + j] = u + v;
+                                a[i + j + len/2] = u - v;
+                                
+                                w *= wlen;
+                            }
                         }
                     }
-                }
             );
         }
         
