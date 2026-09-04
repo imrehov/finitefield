@@ -6,8 +6,9 @@
 #include <vector>
 #include <cstddef>
 
+//inverse can be toggled on but forward ntt by default
 template<int RootOfUnity, int M>
-void fast_iterative_ntt(std::vector<mod_t<M>>& a){
+void fast_iterative_ntt(std::vector<mod_t<M>>& a, bool invert=false){
     if (a.size() <= 1) {
         return;
     }
@@ -56,6 +57,16 @@ void fast_iterative_ntt(std::vector<mod_t<M>>& a){
 
     mod_t<M> omega {RootOfUnity};
 
+    if (invert) {
+        mod_t<M> omega_inv{0};
+
+        if (!omega.reciprocal(omega_inv)) {
+            throw std::domain_error("Root of unity is not invertible");
+        }
+
+        omega = omega_inv;
+    }
+
     //we have log2a.size() stages
     for (std::size_t len {2}; len <= a.size(); len <<= 1) {
         
@@ -78,5 +89,24 @@ void fast_iterative_ntt(std::vector<mod_t<M>>& a){
             }
         }
     }
+
+    if (invert) {
+        mod_t<M> n{
+            static_cast<int>(a.size())
+        };
+
+        mod_t<M> n_inv{0};
+
+        if (!n.reciprocal(n_inv)) {
+            throw std::domain_error(
+                "NTT size is not invertible modulo M"
+            );
+        }
+
+        for (auto& x : a) {
+            x *= n_inv;
+        }
+    }
 }
+
 #endif // F_I_NTT_HPP

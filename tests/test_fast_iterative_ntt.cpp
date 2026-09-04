@@ -173,3 +173,40 @@ TEST_CASE("iterative NTT matches recursive NTT") {
 
     CHECK(iterative == recursive);
 }
+
+TEST_CASE("forward NTT followed by inverse NTT restores input") {
+    std::vector<mod_t<17>> a{
+        mod_t<17>{1},
+        mod_t<17>{2},
+        mod_t<17>{3},
+        mod_t<17>{4}
+    };
+
+    auto original = a;
+
+    fast_iterative_ntt<4, 17>(a);
+    fast_iterative_ntt<4, 17>(a, true);
+
+    CHECK(a == original);
+}
+
+TEST_CASE("size 8 forward and inverse NTT round trip") {
+    std::vector<mod_t<17>> a{
+        mod_t<17>{1},
+        mod_t<17>{5},
+        mod_t<17>{3},
+        mod_t<17>{9},
+        mod_t<17>{2},
+        mod_t<17>{7},
+        mod_t<17>{4},
+        mod_t<17>{6}
+    };
+
+    auto original = a;
+
+    // 2 is primitive 8th root modulo 17.
+    fast_iterative_ntt<2, 17>(a);
+    fast_iterative_ntt<2, 17>(a, true);
+
+    CHECK(a == original);
+}
