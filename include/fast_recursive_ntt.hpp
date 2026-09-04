@@ -21,13 +21,13 @@ std::vector<mod_t<M>> fast_recursive_ntt(
     even.reserve(a.size() / 2);
     odd.reserve(a.size() / 2);
 
-    for (std::size_t i = 0; i < a.size() / 2; ++i) {
+    for (std::size_t i {0}; i < a.size() / 2; ++i) {
         even.push_back(a[2 * i]);
         odd.push_back(a[2 * i + 1]);
     }
 
     // every level needs omega^2
-    mod_t<M> omega_squared = omega * omega;
+    mod_t<M> omega_squared {omega * omega};
 
     even = fast_recursive_ntt<M>(even, omega_squared);
     odd  = fast_recursive_ntt<M>(odd, omega_squared);
@@ -36,7 +36,7 @@ std::vector<mod_t<M>> fast_recursive_ntt(
 
     mod_t<M> w{1};
 
-    for (std::size_t k = 0; k < a.size() / 2; ++k) {
+    for (std::size_t k {0}; k < a.size() / 2; ++k) {
         auto t = w * odd[k];
 
         result[k] = even[k] + t;

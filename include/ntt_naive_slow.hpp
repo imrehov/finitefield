@@ -12,7 +12,7 @@ std::array<mod_t<M>, N> ntt_naive_slow(const std::array<mod_t<M>, N> &a) {
 
     mod_t<M> omega{RootOfUnity};
 
-    for (std::size_t k = 0; k < N; ++k) {
+    for (std::size_t k {0}; k < N; ++k) {
         result[k] = mod_t<M>{0};
 
         for (std::size_t j = 0; j < N; ++j) {
@@ -32,9 +32,9 @@ std::vector<mod_t<M>> ntt_naive_slow(const std::vector<mod_t<M>> &a) {
 
     mod_t<M> omega{RootOfUnity};
 
-    for (std::size_t k = 0; k < N; ++k) {
+    for (std::size_t k {0}; k < N; ++k) {
 
-        for (std::size_t j = 0; j < N; ++j) {
+        for (std::size_t j {0}; j < N; ++j) {
             result[k] += a[j] * omega.exp(static_cast<int>(j * k));
         }
     }
