@@ -1,6 +1,7 @@
 #ifndef MOD_T_HPP
 #define MOD_T_HPP
 
+#include <cstdint>
 #include <istream>
 #include <ostream>
 #include <sstream>
@@ -28,11 +29,11 @@ public:
         return Modulo;
     }
 
-    mod_t operator+(const mod_t &other) const {
+    mod_t operator+(const mod_t& other) const {
         return mod_t(remainder_ + other.remainder_);
     }
 
-    mod_t operator-(const mod_t &other) const {
+    mod_t operator-(const mod_t& other) const {
         return mod_t(remainder_ - other.remainder_);
     }
 
@@ -40,8 +41,13 @@ public:
         return mod_t(-remainder_);
     }
 
-    mod_t operator*(const mod_t &other) const {
-        return mod_t(remainder_ * other.remainder_);
+    mod_t operator*(const mod_t& other) const {
+        mod_t result;
+
+        //benchmarks were overwflowing on the recursive algorithm
+        result.normalize(static_cast<int64_t>(remainder_) * other.remainder_);
+
+        return result;
     }
 
     mod_t operator+(int a) const {
@@ -52,30 +58,36 @@ public:
         return mod_t(remainder_ - a);
     }
 
+    //changed from int to int64_t because of overflow
     mod_t operator*(int a) const {
-        return mod_t(remainder_ * a);
+        mod_t result;
+
+        result.normalize(static_cast<int64_t>(remainder_) * a);
+
+        return result;
     }
 
-    mod_t &operator+=(const mod_t &other) {
+    mod_t &operator+=(const mod_t& other) {
         normalize(remainder_ + other.remainder_);
         return *this;
     }
 
-    mod_t &operator-=(const mod_t &other) {
+    mod_t &operator-=(const mod_t& other) {
         normalize(remainder_ - other.remainder_);
         return *this;
     }
 
-    mod_t &operator*=(const mod_t &other) {
-        normalize(remainder_ * other.remainder_);
+    //benchmark overflow: changed int ->int64_t
+    mod_t &operator*=(const mod_t& other) {
+        normalize(static_cast<int64_t>(remainder_) * other.remainder_);
         return *this;
     }
 
-    bool operator==(const mod_t &other) const {
+    bool operator==(const mod_t& other) const {
         return remainder_ == other.remainder_;
     }
 
-    bool operator!=(const mod_t &other) const {
+    bool operator!=(const mod_t& other) const {
         return !(*this == other);
     }
 
@@ -93,24 +105,24 @@ public:
         return !(*this == other);
     }
 
-    bool operator<(const mod_t &other) const {
+    bool operator<(const mod_t& other) const {
         return remainder_ < other.remainder_;
     }
 
-    bool operator>(const mod_t &other) const {
+    bool operator>(const mod_t& other) const {
         return remainder_ > other.remainder_;
     }
 
-    bool operator<=(const mod_t &other) const {
+    bool operator<=(const mod_t& other) const {
         return remainder_ <= other.remainder_;
     }
 
-    bool operator>=(const mod_t &other) const {
+    bool operator>=(const mod_t& other) const {
         return remainder_ >= other.remainder_;
     }
 
     //parse from string, care it can parse like "123abc"
-    bool from_string(const std::string &s, int m) {
+    bool from_string(const std::string& s, int m) {
         int r;
 
         //iss behaves like std::cin
@@ -125,13 +137,13 @@ public:
         return true;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const mod_t &a) {
+    friend std::ostream &operator<<(std::ostream& os, const mod_t& a) {
         
         os << a.remainder_;
         return os;
     }
 
-    friend std::istream &operator>>(std::istream &is, mod_t &a) {
+    friend std::istream &operator>>(std::istream& is, mod_t& a) {
         int b = is.peek();
         if(!is) {
             is.setstate(std::ios::failbit);
@@ -155,7 +167,7 @@ public:
     }
 
     //euclid algo thing
-    bool reciprocal(mod_t &rinv) const {
+    bool reciprocal(mod_t& rinv) const {
 
         if (remainder_ == 0){
             return false;
@@ -186,7 +198,7 @@ public:
         return true;
     }
 
-    mod_t operator/(const mod_t &other) const {
+    mod_t operator/(const mod_t& other) const {
         mod_t<Modulo> inv;
 
         if(!other.reciprocal(inv)) {
@@ -196,14 +208,14 @@ public:
         return *this * inv;
     }
 
-    mod_t &operator/=(const mod_t &other) {
+    mod_t &operator/=(const mod_t& other) {
         *this = *this / other;
         
         return *this;
     }
 
     // Legacy: operator% (zero in a field). Kept for API compatibility.
-    mod_t operator%(const mod_t &other) const {
+    mod_t operator%(const mod_t& other) const {
 
         mod_t inv;
 
@@ -213,7 +225,7 @@ public:
         return mod_t(0);
     }
 
-    mod_t &operator%=(const mod_t &other) {
+    mod_t &operator%=(const mod_t& other) {
         *this = *this % other;
         return *this;
     }

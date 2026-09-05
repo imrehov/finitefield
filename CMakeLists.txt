@@ -3,6 +3,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(finitefield LANGUAGES CXX)
 
+find_package(Threads REQUIRED)
+
 
 add_library(finitefield INTERFACE)
 
@@ -17,6 +19,40 @@ target_compile_features(
     INTERFACE
         cxx_std_20
 )
+
+if (BUILD_BENCHMARKS)
+    function(add_benchmark benchmark_name)
+    add_executable(
+            ${benchmark_name}
+            benchmarks/${benchmark_name}.cpp
+        )
+
+        target_link_libraries(
+            ${benchmark_name}
+            PRIVATE
+                finitefield
+        )
+
+        target_include_directories(
+            ${benchmark_name}
+            PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/misc
+        )
+
+        target_link_libraries(
+            ${benchmark_name}
+            PRIVATE
+                Threads::Threads
+        )
+
+    endfunction()
+
+    add_benchmark(benchmark_threaded_ntt)
+    add_benchmark(benchmark_singlethread_iter_ntt)
+    add_benchmark(benchmark_singlethread_rec_ntt)
+    add_benchmark(benchmark_singlethread_naive_ntt)
+
+endif()
 
 
 include(CTest)
