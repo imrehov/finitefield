@@ -206,7 +206,7 @@ public:
         return true;
     }
 
-    FINITEFIELD_HD mod_t operator/(const mod_t& other) const {
+    mod_t operator/(const mod_t& other) const {
         mod_t<Modulo> inv;
 
         if(!other.reciprocal(inv)) {
@@ -216,14 +216,14 @@ public:
         return *this * inv;
     }
 
-    FINITEFIELD_HD mod_t &operator/=(const mod_t& other) {
+    mod_t &operator/=(const mod_t& other) {
         *this = *this / other;
         
         return *this;
     }
 
     // Legacy: operator% (zero in a field). Kept for API compatibility.
-    FINITEFIELD_HD mod_t operator%(const mod_t& other) const {
+    mod_t operator%(const mod_t& other) const {
 
         mod_t inv;
 
@@ -233,7 +233,7 @@ public:
         return mod_t(0);
     }
 
-    FINITEFIELD_HD mod_t &operator%=(const mod_t& other) {
+    mod_t &operator%=(const mod_t& other) {
         *this = *this % other;
         return *this;
     }
