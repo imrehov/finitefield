@@ -1,6 +1,12 @@
 #ifndef MOD_T_HPP
 #define MOD_T_HPP
 
+#ifdef __CUDACC__
+    #define FINITEFIELD_HD __host__ __device__
+#else
+    #define FINITEFIELD_HD
+#endif
+
 #include <cstdint>
 #include <istream>
 #include <ostream>
@@ -12,12 +18,14 @@
 
 template <int Modulo>
 class mod_t {
+    static_assert(Modulo > 0, "Modulo must be positive");
 public:
     // need this so i can declare
-    mod_t() : remainder_(0) {}
+    
+    FINITEFIELD_HD mod_t() : remainder_(0) {}
 
-    mod_t(int remainder) {
-        static_assert(Modulo > 0, "Modulo must be positive");
+    FINITEFIELD_HD mod_t(int remainder) {
+        
         normalize(remainder);
     }
 
@@ -29,19 +37,19 @@ public:
         return Modulo;
     }
 
-    mod_t operator+(const mod_t& other) const {
+    FINITEFIELD_HD mod_t operator+(const mod_t& other) const {
         return mod_t(remainder_ + other.remainder_);
     }
 
-    mod_t operator-(const mod_t& other) const {
+    FINITEFIELD_HD mod_t operator-(const mod_t& other) const {
         return mod_t(remainder_ - other.remainder_);
     }
 
-    mod_t operator-() const {
+    FINITEFIELD_HD mod_t operator-() const {
         return mod_t(-remainder_);
     }
 
-    mod_t operator*(const mod_t& other) const {
+    FINITEFIELD_HD mod_t operator*(const mod_t& other) const {
         mod_t result;
 
         //benchmarks were overwflowing on the recursive algorithm
@@ -50,16 +58,16 @@ public:
         return result;
     }
 
-    mod_t operator+(int a) const {
+    FINITEFIELD_HD mod_t operator+(int a) const {
         return mod_t(remainder_ + a);
     }
 
-    mod_t operator-(int a) const {
+    FINITEFIELD_HD mod_t operator-(int a) const {
         return mod_t(remainder_ - a);
     }
 
     //changed from int to int64_t because of overflow
-    mod_t operator*(int a) const {
+    FINITEFIELD_HD mod_t operator*(int a) const {
         mod_t result;
 
         result.normalize(static_cast<int64_t>(remainder_) * a);
@@ -67,18 +75,18 @@ public:
         return result;
     }
 
-    mod_t &operator+=(const mod_t& other) {
+    FINITEFIELD_HD mod_t &operator+=(const mod_t& other) {
         normalize(remainder_ + other.remainder_);
         return *this;
     }
 
-    mod_t &operator-=(const mod_t& other) {
+    FINITEFIELD_HD mod_t &operator-=(const mod_t& other) {
         normalize(remainder_ - other.remainder_);
         return *this;
     }
 
     //benchmark overflow: changed int ->int64_t
-    mod_t &operator*=(const mod_t& other) {
+    FINITEFIELD_HD mod_t &operator*=(const mod_t& other) {
         normalize(static_cast<int64_t>(remainder_) * other.remainder_);
         return *this;
     }
@@ -167,7 +175,7 @@ public:
     }
 
     //euclid algo thing
-    bool reciprocal(mod_t& rinv) const {
+    FINITEFIELD_HD bool reciprocal(mod_t& rinv) const {
 
         if (remainder_ == 0){
             return false;
@@ -198,7 +206,7 @@ public:
         return true;
     }
 
-    mod_t operator/(const mod_t& other) const {
+    FINITEFIELD_HD mod_t operator/(const mod_t& other) const {
         mod_t<Modulo> inv;
 
         if(!other.reciprocal(inv)) {
@@ -208,14 +216,14 @@ public:
         return *this * inv;
     }
 
-    mod_t &operator/=(const mod_t& other) {
+    FINITEFIELD_HD mod_t &operator/=(const mod_t& other) {
         *this = *this / other;
         
         return *this;
     }
 
     // Legacy: operator% (zero in a field). Kept for API compatibility.
-    mod_t operator%(const mod_t& other) const {
+    FINITEFIELD_HD mod_t operator%(const mod_t& other) const {
 
         mod_t inv;
 
@@ -225,13 +233,13 @@ public:
         return mod_t(0);
     }
 
-    mod_t &operator%=(const mod_t& other) {
+    FINITEFIELD_HD mod_t &operator%=(const mod_t& other) {
         *this = *this % other;
         return *this;
     }
 
     //uses binary exponentiation
-    mod_t exp(int e) const {
+    FINITEFIELD_HD mod_t exp(int e) const {
 
         if (e == 0) {
             
@@ -275,14 +283,14 @@ public:
 private:
     int remainder_;
 
-    void normalize(int x) {
-        int r = x % Modulo;
+    FINITEFIELD_HD void normalize(std::int64_t x) {
+        std::int64_t r = x % Modulo;
 
         if (r < 0) {
             r += Modulo;
         }
 
-        remainder_ = r;
+        remainder_ = static_cast<int>(r);
     }
 
 };
