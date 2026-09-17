@@ -251,7 +251,18 @@ public:
             
             mod_t<Modulo> inv;
             if (!reciprocal(inv)){
-                throw std::runtime_error("mod_t::exp: negative exponent of non-unit");
+
+// nvcc doesnt compile with throws, so disable it for gpu
+// this is ok because it should never be negative
+#ifndef __CUDA_ARCH__
+                throw std::runtime_error(
+                    "mod_t::exp: negative exponent of non-unit"
+                );
+#else
+                // device-side policy:
+                // don't throw
+                return mod_t{0};
+#endif
             }
 
             return inv.exp(-e);
