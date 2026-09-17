@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(finitefield LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CUDA_STANDARD 20)
+
+project(finitefield LANGUAGES CXX CUDA)
 
 find_package(Threads REQUIRED)
 
@@ -18,6 +21,12 @@ target_compile_features(
     finitefield
     INTERFACE
         cxx_std_20
+)
+
+target_link_libraries(
+    finitefield
+    INTERFACE
+        Threads::Threads
 )
 
 if (BUILD_BENCHMARKS)
@@ -97,3 +106,19 @@ if(BUILD_TESTING)
     add_finitefield_test(test_threaded_iterative_ntt)
 
 endif()
+
+add_executable(cuda_test
+    cuda/cuda_test.cu
+)
+
+target_link_libraries(
+    cuda_test
+    PRIVATE
+        finitefield
+)
+
+target_compile_features(
+    cuda_test
+    PRIVATE
+        cuda_std_20
+)

@@ -3,7 +3,9 @@
 #include <memory.h>
 #include <cstdlib>
 #include <ctime>
+#include <numeric>
 #include <stdio.h>
+#include <cuda/cmath>
 
 #include "../include/mod_t.hpp"
 
@@ -26,6 +28,28 @@ void ntt_naive_slow_cuda_wrapper(int n){
     cudaMallocHost(&A, n * sizeof(mod_t<M>));
     cudaMallocHost(&B, n * sizeof(mod_t<M>));
     cudaMallocHost(&C, n * sizeof(mod_t<M>));
+
+    fillAllocatedArray(A);
+    fillAllocatedArray(B);
+
+    cudaMalloc(&devA, n * sizeof(mod_t<M>));
+    cudaMalloc(&devB, n * sizeof(mod_t<M>));
+    cudaMalloc(&devC, n * sizeof(mod_t<M>));
+
+    cudaMemcpy(devA, A, n * sizeof(mod_t<M>), cudaMemcpyHostToDevice);
+    cudaMemcpy(devB, B, n * sizeof(mod_t<M>), cudaMemcpyHostToDevice);
+    cudaMemset(devC, 0, n * sizeof(mod_t<M>));
+
+    int threads {256};
+    //TODO where is this from
+    int blocks {cuda::ceil_div(n, threads)};
+
+    //TODO finish
+}
+template <int M>
+void fillAllocatedArray(mod_t<M>* a, int len){
+    std::iota(std::begin(a), std::end(a), 1);
+
 }
 
 int main(){

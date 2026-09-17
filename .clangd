@@ -1,2 +1,18 @@
 CompileFlags:
-  Add: [-std=c++20]
+  CompilationDatabase: build
+
+---
+If:
+  PathMatch: .*\.cu$
+
+CompileFlags:
+  Remove:
+    - -forward-unknown-to-host-compiler
+    - --options-file
+    - --generate-code=*
+  Add:
+    - -I/usr/include/cccl
+    - -xcuda
+    - --cuda-path=/opt/cuda
+    - --cuda-gpu-arch=sm_75
+    - -std=c++20
