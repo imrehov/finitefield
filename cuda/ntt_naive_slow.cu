@@ -12,6 +12,7 @@ __global__ void ntt_naive_slow_cuda(){
 
 }
 
+// param n is the length of the vector, idk might be btter option to include it
 template <int RootOfUnity, int M>
 void ntt_naive_slow_cuda_wrapper(int n){
     mod_t<M>* A {nullptr};
