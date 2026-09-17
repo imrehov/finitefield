@@ -28,7 +28,7 @@ std::vector<mod_t<M>> ntt_naive_slow(const std::vector<mod_t<M>> &a) {
     
     const std::size_t N = a.size();
     
-    std::vector<mod_t<M>> result(N, mod_t<M>{0});
+    std::vector<mod_t<M>> result(N);
 
     mod_t<M> omega{RootOfUnity};
 

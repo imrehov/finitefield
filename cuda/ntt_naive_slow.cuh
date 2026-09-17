@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <memory.h>
 #include <cstdlib>
 #include <ctime>
@@ -5,9 +6,12 @@
 
 #include <cuda_runtime_api.h>
 #include <cuda/cmath>
+#include <vector>
 
 #include "../include/mod_t.hpp"
 
+//make sure you have CUDA_LOG_FILE enviroment variable set to a text file
+//then the driver will save more verbose error messages there
 #define CUDA_CHECK(expr_to_check) do {            \
     cudaError_t result  = expr_to_check;          \
     if(result != cudaSuccess)                     \
@@ -34,7 +38,7 @@ __global__ void ntt_naive_slow_cuda(const mod_t<M>* A, mod_t<M>* C, const mod_t<
 
 // param n is the length of the vector, idk might be btter option to include it
 template <int RootOfUnity, int M>
-void ntt_naive_slow_cuda_wrapper(const int n){
+std::vector<mod_t<M>> ntt_naive_slow_cuda_wrapper(const int n){
     
     const mod_t<M> omega {RootOfUnity};
 
@@ -77,12 +81,15 @@ void ntt_naive_slow_cuda_wrapper(const int n){
 
     std::cout << '\n';
 
+    std::vector<mod_t<M>> result {C, C + n};
+
     //cleanup
     CUDA_CHECK(cudaFree(devA));
     CUDA_CHECK(cudaFree(devC));
     CUDA_CHECK(cudaFreeHost(A));
     CUDA_CHECK(cudaFreeHost(C));
 
+    return result;
     
 }
 template <int M>
@@ -95,11 +102,4 @@ void fillAllocatedArray(mod_t<M>* a, int len){
         a[i] = temp;
     }
 
-}
-
-int main()
-{
-    ntt_naive_slow_cuda_wrapper<4, 17>(4);
-
-    return 0;
 }

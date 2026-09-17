@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
+
+project(finitefield LANGUAGES CXX CUDA)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CUDA_STANDARD 20)
+
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES 0)
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS 0)
 
 project(finitefield LANGUAGES CXX CUDA)
 
@@ -105,20 +112,29 @@ if(BUILD_TESTING)
     add_finitefield_test(test_fast_iterative_ntt)
     add_finitefield_test(test_threaded_iterative_ntt)
 
+    function(add_cuda_test test_name)
+        add_executable(
+            ${test_name}
+            tests/${test_name}.cu
+        )
+
+        target_include_directories(
+            ${test_name}
+            PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/src
+        )
+
+        target_link_libraries(
+            ${test_name}
+            PRIVATE
+                finitefield
+        )
+
+        add_test(
+            NAME ${test_name}
+            COMMAND ${test_name}
+        )
+    endfunction()
+
+    add_cuda_test(test_naive_cpu_vs_cuda)
 endif()
-
-add_executable(cuda_test
-    cuda/cuda_test.cu
-)
-
-target_link_libraries(
-    cuda_test
-    PRIVATE
-        finitefield
-)
-
-target_compile_features(
-    cuda_test
-    PRIVATE
-        cuda_std_20
-)
