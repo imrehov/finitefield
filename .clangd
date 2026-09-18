@@ -1,16 +1,20 @@
 CompileFlags:
-  CompilationDatabase: build
+  CompilationDatabase: build-testing
+
+  Remove:
+    - -forward-unknown-to-host-compiler
+    - --options-file
+    - --generate-code=*
 
 ---
 If:
   PathMatch: '.*\.(cu|cuh)$'
 
 CompileFlags:
-  Remove:
-    - -forward-unknown-to-host-compiler
-    - --options-file
-    - --generate-code=*
   Add:
+    - -I/home/azz/git/finitefield/include
+    - -I/home/azz/git/finitefield/src
+    - -I/home/azz/git/finitefield/cuda
     - -I/usr/include/cccl
     - -xcuda
     - --cuda-path=/opt/cuda

@@ -1,8 +1,6 @@
-#include <algorithm>
 #include <memory.h>
 #include <cstdlib>
 #include <ctime>
-#include <iostream>
 
 #include <cuda_runtime_api.h>
 #include <cuda/cmath>
@@ -26,7 +24,7 @@
 } while(0)
 
 template <int M>
-__global__ void ntt_naive_slow_cuda(const mod_t<M>* A, mod_t<M>* C, const mod_t<M> omega, const int n){
+__global__ void ntt_naive_slow_cuda(const mod_t<M>* A, mod_t<M>* C, const mod_t<M> omega, const std::size_t n){
     auto workIndex {threadIdx.x + blockIdx.x * blockDim.x};
 
     if (workIndex < n){
@@ -38,33 +36,34 @@ __global__ void ntt_naive_slow_cuda(const mod_t<M>* A, mod_t<M>* C, const mod_t<
 
 // param n is the length of the vector, idk might be btter option to include it
 template <int RootOfUnity, int M>
-std::vector<mod_t<M>> ntt_naive_slow_cuda_wrapper(const int n){
+std::vector<mod_t<M>> ntt_naive_slow_cuda_wrapper(const std::vector<mod_t<M>>& a){
     
+    //cannot do static_assert because vector.empty() is runtime
+    if (a.empty()) {
+        throw std::invalid_argument("input vector is empty");
+    }
+
     const mod_t<M> omega {RootOfUnity};
 
-    const auto length {n * sizeof(mod_t<M>)};
+    const std::size_t n{a.size()};
+    //needed bcs cuda allocation/copy size is calcd in bytes
+    const std::size_t bytes{n * sizeof(mod_t<M>)};
     
-    mod_t<M>* A {nullptr};
-    mod_t<M>* C {nullptr};
+    const mod_t<M>* A{a.data()};
 
     mod_t<M>* devA {nullptr};
     mod_t<M>* devC {nullptr};
 
-    CUDA_CHECK(cudaMallocHost(&A, length));
-    CUDA_CHECK(cudaMallocHost(&C, length));
+    CUDA_CHECK(cudaMalloc(&devA, bytes));
+    CUDA_CHECK(cudaMalloc(&devC, bytes));
 
-    fillAllocatedArray(A, n);
+    CUDA_CHECK(cudaMemcpy(devA, A, bytes, cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemset(devC, 0, bytes));
 
-    CUDA_CHECK(cudaMalloc(&devA, length));
-    CUDA_CHECK(cudaMalloc(&devC, length));
-
-    CUDA_CHECK(cudaMemcpy(devA, A, length, cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemset(devC, 0, length));
-
-    constexpr int threads {256};
+    constexpr std::size_t threads {256};
 
     //this is basically (n + threads - 1) / threads
-    const int blocks {cuda::ceil_div(n, threads)};
+    const std::size_t blocks {cuda::ceil_div(bytes, threads)};
 
     ntt_naive_slow_cuda<M><<<blocks, threads>>>(devA, devC, omega, n);
 
@@ -73,25 +72,18 @@ std::vector<mod_t<M>> ntt_naive_slow_cuda_wrapper(const int n){
 
     CUDA_CHECK(cudaDeviceSynchronize());
 
-    CUDA_CHECK(cudaMemcpy(C, devC, length, cudaMemcpyDeviceToHost));
+    std::vector<mod_t<M>> result_vec(n);
 
-    for (int i = 0; i < n; ++i) {
-        std::cout << C[i] << ' ';
-    }
-
-    std::cout << '\n';
-
-    std::vector<mod_t<M>> result {C, C + n};
+    CUDA_CHECK(cudaMemcpy(result_vec.data(), devC, bytes, cudaMemcpyDeviceToHost));
 
     //cleanup
     CUDA_CHECK(cudaFree(devA));
     CUDA_CHECK(cudaFree(devC));
-    CUDA_CHECK(cudaFreeHost(A));
-    CUDA_CHECK(cudaFreeHost(C));
 
-    return result;
+    return result_vec;
     
 }
+
 template <int M>
 void fillAllocatedArray(mod_t<M>* a, int len){
 
