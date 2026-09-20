@@ -1,5 +1,5 @@
 CompileFlags:
-  CompilationDatabase: build-testing
+  CompilationDatabase: build-ci-test
 
   Remove:
     - -forward-unknown-to-host-compiler
