@@ -1,5 +1,5 @@
 # finitefield
-![CMake Build & Test](https://github.com/imrehov/finitefield/actions/workflows/cmake.yml/badge.svg)
+![Build Status](https://img.shields.io/github/actions/workflow/status/imrehov/finitefield/cmake.yml?branch=main&style=for-the-badge&label=BUILD%20%26%20TESTS)
 
 A modern C++20 / CUDA project exploring finite-field arithmetic and high-performance implementations of the Number Theoretic Transform (NTT).
 
