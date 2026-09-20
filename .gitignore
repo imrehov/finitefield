@@ -1,3 +1,4 @@
 build*
 hwcc
 todo.md
+.cache

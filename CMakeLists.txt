@@ -15,8 +15,6 @@ set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES 0)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS 0)
 
-project(finitefield LANGUAGES CXX CUDA)
-
 find_package(Threads REQUIRED)
 
 
@@ -137,6 +135,12 @@ if(ENABLE_CUDA)
                 ${test_name}
                 PRIVATE
                     finitefield
+            )
+
+            target_compile_features(
+                ${test_name}
+                PRIVATE
+                    cuda_std_20
             )
 
             add_test(
